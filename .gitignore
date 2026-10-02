@@ -1,0 +1,6 @@
+*.exe
+*.log
+*.pdb
+manifest.json
+ua_voice.dat
+
