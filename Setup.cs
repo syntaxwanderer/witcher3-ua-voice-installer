@@ -71,6 +71,13 @@ public class Job
     Dictionary<string, object> Obj(object o) { return (Dictionary<string, object>)o; }
     uint U(object o) { return Convert.ToUInt32(o); }
     long L(object o) { return Convert.ToInt64(o); }
+    // brpc.w3speech від наших попередніх версій (оновлення поверх старої версії): міняємо/видаляємо як свій
+    bool IsPrev(Dictionary<string, object> m, uint c)
+    {
+        if (c == 0 || !m.ContainsKey("prev_crcs")) return false;
+        foreach (object o in (object[])m["prev_crcs"]) if (U(o) == c) return true;
+        return false;
+    }
 
     void Load()
     {
@@ -118,7 +125,9 @@ public class Job
             }
             else return "польський файл озвучення іншої версії. Ця версія мода — для The Witcher 3 Remastered (5.0). Якщо гра оновилась — зачекайте на оновлення мода або перевірте цілісність файлів у Steam/GOG.";
         }
-        bool speechDone = File.Exists(dst) && W3UA.CrcFile(dst) == U(m["new_crc"]);
+        uint dstCrc = File.Exists(dst) ? W3UA.CrcFile(dst) : 0;
+        bool speechDone = File.Exists(dst) && dstCrc == U(m["new_crc"]);
+        bool speechOld = File.Exists(dst) && !speechDone && IsPrev(m, dstCrc);
         long need = speechDone ? 0 : L(m["new_size"]);
 
         Dictionary<string, object> sb = Obj(man["storybook"]);
@@ -155,8 +164,9 @@ public class Job
             if (W3UA.CrcFile(tmp) != U(m["new_crc"])) { File.Delete(tmp); return "самоперевірка не пройшла; файли гри не змінено."; }
             if (File.Exists(dst))
             {
+                if (speechOld) { File.Delete(dst); Log("попередню версію української озвучки замінено"); }
                 // справжній бразильський пакет (якщо був) відкладаємо, а не видаляємо
-                if (!File.Exists(dst + BAK)) { File.Move(dst, dst + BAK); Log("знайдено бразильську озвучку — відкладено в brpc.w3speech" + BAK); }
+                else if (!File.Exists(dst + BAK)) { File.Move(dst, dst + BAK); Log("знайдено бразильську озвучку — відкладено в brpc.w3speech" + BAK); }
                 else File.Delete(dst);
             }
             File.Move(tmp, dst);
@@ -278,7 +288,8 @@ public class Job
         int n = 0;
         Dictionary<string, object> m = Obj(Obj(man["packs"])["content0"]);
         string dst = Path.Combine(Content0, "brpc.w3speech");
-        if (File.Exists(dst) && W3UA.CrcFile(dst) == U(m["new_crc"])) { File.Delete(dst); n++; Log("озвучення: українську видалено"); }
+        uint dc = File.Exists(dst) ? W3UA.CrcFile(dst) : 0;
+        if (File.Exists(dst) && (dc == U(m["new_crc"]) || IsPrev(m, dc))) { File.Delete(dst); n++; Log("озвучення: українську видалено"); }
         else if (File.Exists(dst)) Log("brpc.w3speech не наш — не чіпаю");
         if (!File.Exists(dst) && File.Exists(dst + BAK)) { File.Move(dst + BAK, dst); n++; Log("бразильську озвучку повернуто"); }
         if (File.Exists(Bundle + BAK)) { File.Copy(Bundle + BAK, Bundle, true); File.Delete(Bundle + BAK); n++; Log("ролики оповідача: відновлено"); }
