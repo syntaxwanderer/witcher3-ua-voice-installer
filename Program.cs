@@ -13,7 +13,7 @@ public class MainForm : Form
 
     public MainForm()
     {
-        Text = "Українська озвучка The Witcher 3 Remastered — v1.1";
+        Text = "Українська озвучка The Witcher 3 Remastered — v1.2";
         ClientSize = new Size(640, 444); FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false;
         Font = new Font("Segoe UI", 9.5f);
         Label t = new Label(); t.Text = "Фанатська українська озвучка (синтез ШІ). Неофіційна робота, не схвалена CD PROJEKT RED.\r\nУкраїнська з\u2019явиться окремим пунктом меню озвучення «Українська (ШІ)» (замість бразильської).\r\nПотрібні: The Witcher 3 Remastered (5.0) і польський пакет озвучення (польська не змінюється). Гра має бути закрита.";

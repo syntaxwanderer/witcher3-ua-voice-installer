@@ -31,14 +31,15 @@ https://www.nexusmods.com/witcher3/mods/12946
 3. **Builds the voice-over** (`W3UA.PatchSpeech`): reads the player's Polish `plpc.w3speech` (never modified) and writes
    `content\content0\brpc.w3speech` — the Brazilian-Portuguese speech slot, which becomes the menu option «Українська (ШІ)».
    Replaced entries get our audio block and the player's lipsync XOR our delta; everything else is copied as is.
-   Written to a temporary file, verified by CRC32, then renamed. An existing real `brpc.w3speech` is kept as `brpc.w3speech.bak_ua5`.
+   Written to a temporary file, verified by CRC32, then renamed. An existing real `brpc.w3speech` is kept as `brpc.w3speech.bak_ua5`;
+   an older version of this voice-over (its CRC is listed in the manifest `prev_crcs`) is replaced in place instead.
 4. **Storybook narrator** (`W3UA.PatchMovie`): backs up `content\content0\bundles\movies.bundle` as `movies.bundle.bak_ua5`,
    replaces the ADX audio of the Brazilian-Portuguese channels of 19 storybook videos in place (same size), verifies CRC32.
 5. **Menu label** (`Job.SetLabel`): backs up `content\content0\ua.w3strings` as `ua.w3strings.bak_ua5` and changes three strings
    (the speech-language names) to «Українська (ШІ)». All other strings stay byte-for-byte identical.
 6. **Speech language** (`Job.SetSpeech`): in `Documents\The Witcher 3\dx12user.settings` / `user.settings` sets
    `SpeechLanguage=BR` (and `RequestedSpeechLanguage`); the previous value is saved in `ua_voice_prev_speech.txt`.
-7. **Uninstall** (`Job.Uninstall`): deletes our `brpc.w3speech` (only if its CRC matches ours), restores every `.bak_ua5`
+7. **Uninstall** (`Job.Uninstall`): deletes our `brpc.w3speech` (only if its CRC matches this or a previous version of the voice-over), restores every `.bak_ua5`
    backup and the previous speech language.
 
 It does **not**: access the network, start or inject into the game, write to the registry, install services or scheduled tasks,
